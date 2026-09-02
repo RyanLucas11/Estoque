@@ -6,16 +6,14 @@ COPY gradlew .
 COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
+COPY src src
 
 RUN chmod +x gradlew
 
-# Copia o código-fonte da aplicação
-COPY src src
-
 RUN ./gradlew clean bootJar --no-daemon
 
-COPY build/libs/*.jar app.jar
+RUN cp build/libs/*.jar app.jar
 
 EXPOSE 8082
 
-ENTRYPOINT ["java", "-jar", "app.jar"]]
+ENTRYPOINT ["java", "-jar", "app.jar"]
