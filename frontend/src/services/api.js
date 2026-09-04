@@ -1,28 +1,55 @@
-const BASE_URL = 'http://localhost:8082/api';
+const BASE_URL =
+  import.meta.env.VITE_API_URL || 'https://estoque-backend-tz7k.onrender.com/api';
 
-export async function get(path) {
-  const res = await fetch(`${BASE_URL}${path}`);
-  return res.json();
+async function request(path, options = {}) {
+  const response = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  });
+
+  if (!response.ok) {
+    let message = `Erro HTTP ${response.status}`;
+
+    try {
+      const error = await response.json();
+      message = error.message || message;
+    } catch {
+      // Mantém a mensagem padrão quando a resposta não for JSON.
+    }
+
+    throw new Error(message);
+  }
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  return response.json();
 }
 
-export async function post(path, body) {
-  const res = await fetch(`${BASE_URL}${path}`, {
+export function get(path) {
+  return request(path);
+}
+
+export function post(path, body) {
+  return request(path, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  return res.json();
 }
 
-export async function put(path, body) {
-  const res = await fetch(`${BASE_URL}${path}`, {
+export function put(path, body) {
+  return request(path, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  return res.json();
 }
 
-export async function del(path) {
-  await fetch(`${BASE_URL}${path}`, { method: 'DELETE' });
+export function del(path) {
+  return request(path, {
+    method: 'DELETE',
+  });
 }
